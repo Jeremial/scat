@@ -19,7 +19,7 @@
 
 #include "scat.h"
 
-const char *short_opt = "b:f:hs:v";
+const char *short_opt = "b:hs:v";
 
 const struct option long_opt[] = {
     {"bits",    required_argument,  NULL,   'b'},
