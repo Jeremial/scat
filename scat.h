@@ -20,17 +20,13 @@
 #ifndef SCAT_H
 #define SCAT_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/time.h>
-#include <time.h>
-#include <getopt.h>
-
 #define PACKAGE_NAME "scat"
+
 #define VERSION "1.0.0"
 
 /* Change this to 8 if you want a true bps / character, and not a modem simulation */
 #define BITS_PER_CHAR 8
+
 #define SPEED_BPS 100
 
 void usage(int mode);
