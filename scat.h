@@ -24,11 +24,15 @@
 
 #define VERSION "1.0.0"
 
+#define BUGREPORT "jeremial90@gmail.com"
+
 /* Change this to 8 if you want a true bps / character, and not a modem simulation */
 #define BITS_PER_CHAR 8
 
-#define SPEED_BPS 100
+#define BPS 100
 
-void usage(int mode);
+void usage(void);
+void version(void);
+void bugs(void);
 
 #endif

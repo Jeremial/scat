@@ -34,29 +34,28 @@ const struct option long_opt[] = {
     {NULL,      0,                  NULL,   0}
 };
 
-void usage(int mode) {
-    switch (mode) {
-    case 1:
-        printf("%s version %s\n", PACKAGE_NAME, VERSION);
-        break;
-    case 2:
-        printf("Usage: %s [--bits=<bits>] [--help] [--speed=<speed>] \n"
-               "            [--version] [<file1> <file2> ...]\n", PACKAGE_NAME);
-        printf("options:\n"
-               "  -b, --bits=<bit>: bits per char, default to 8\n"
-               "  -h, --help: print this help\n"
-               "  -s, --speed=<speed>: print speed(bps), default to 100\n"
-               "  -v, --version: version\n");
-        break;
-    }
+void usage(void) {
+    printf("Usage: %s [-hv] [-b bits] [-s bps] [file ...]\n", PACKAGE_NAME);
+    printf("options:\n"
+           "  -b bits ,  --bits=<bits> : bits per char, default to 8\n"
+           "  -h      ,  --help        : print this help\n"
+           "  -s bps  ,  --speed=<bps> : print speed(bps), default to 100\n"
+           "  -v      ,  --version     : version\n");
+}
+
+void version(void){
+    printf("%s version %s\n", PACKAGE_NAME, VERSION);
+}
+
+void bugs(void){
+    printf("Report bugs to <%s>\n", BUGREPORT);
 }
 
 int main(int argc, char **argv) {
     char c = 0, ch;
     char *file_name = NULL;
     int bits_per_char = BITS_PER_CHAR;
-    int bps = SPEED_BPS;
-    int cat_file = 0;
+    int bps = BPS;
     int i;
     struct timespec delay;
     FILE *fd;
@@ -70,27 +69,29 @@ int main(int argc, char **argv) {
             break;
         case 'h':
         case '?':
-            usage(2);
-            exit(1);
+            usage();
+            bugs();
+            exit(EXIT_SUCCESS);
             break;
         case 's':
             bps = atoi(optarg);
             break;
         case 'v':
-            usage(1);
-            exit(0);
+            version();
+            exit(EXIT_SUCCESS);
             break;
         default:
+            usage();
+            bugs();
+            exit(EXIT_FAILURE);
             break;
         }
     }
 
     if (bps < 1) {
         fprintf(stderr, "%s: bps rate [%d] not a positive integer.\n", PACKAGE_NAME, bps);
-        exit(1);
-    }
-
-    if (bps > bits_per_char) {
+        exit(EXIT_FAILURE);
+    }else if (bps > bits_per_char) {
         delay.tv_sec = 0;
         delay.tv_nsec = 1000000000 / bps * bits_per_char;
     } else {
@@ -98,12 +99,11 @@ int main(int argc, char **argv) {
         delay.tv_nsec = (long)(1000000000 * (bits_per_char / (double)bps - delay.tv_sec));
     }
 
-    if (optind < argc) {
-        cat_file = 1;
-    }
+    argc -= optind;
+    argv += optind;
 
-    if (cat_file) {
-        for (i = optind; i < argc; ++i) {
+    if (argc) { /* scat from local files */
+        for (i = 0; i < argc; ++i) {
             file_name = argv[i];
             if ((fd = fopen(file_name, "r")) == NULL) {
                 fprintf(stderr, "%s: could not open %s for reading.\n", PACKAGE_NAME, file_name);
@@ -113,16 +113,13 @@ int main(int argc, char **argv) {
                 putchar(ch);
             }
             fclose(fd);
-
-            if (i < argc) {
-                printf("\n");
-            }
+            putchar('\n'); /* start new line */
         }
-    } else {
+    } else { /* scat from stdin */
         while ((ch = fgetc(stdin)) != EOF) {
             nanosleep(&delay, NULL);
             putchar(ch);
         }
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
