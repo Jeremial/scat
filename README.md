@@ -11,13 +11,13 @@ Usage:
 ---
 
     % scat -h
-    Usage: scat [--bits=<bits>] [--help] [--speed=<speed>]
-                [--version] [<file1> <file2> ...]
+    Usage: scat [-hv] [-b bits] [-s bps] [file ...]
     options:
-      -b, --bits=<bit>: bits per char, default to 8
-      -h, --help: print this help
-      -s, --speed=<speed>: print speed(bps), default to 100
-      -v, --version: version
+      -b bits ,  --bits=<bits> : bits per char, default to 8
+      -h      ,  --help        : print this help
+      -s bps  ,  --speed=<bps> : print speed(bps), default to 100
+      -v      ,  --version     : version
+    Report bugs to <jeremial90@gmail.com>
 
 Install:
 ---
