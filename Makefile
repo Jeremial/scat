@@ -1,10 +1,8 @@
-BIN=scat
-DIR=/usr/local/bin
 
-all: $(BIN)
+scat: scat.c deps/commander/commander.c
+	$(CC) $^ -o $@ -Wall -Wextra
 
-install:
-	mv $(BIN) $(DIR)
+clean:
+	rm -rf scat
 
-uninstall:
-	rm $(DIR)/$(BIN)
+.PNONY: clean

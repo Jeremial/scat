@@ -10,22 +10,20 @@ bits per second, as if you were using a modem or slow serial connection.
 Usage:
 ---
 
-    % scat -h
-    Usage: scat [-hv] [-b bits] [-s bps] [file ...]
-    options:
-      -b bits ,  --bits=<bits> : bits per char, default to 8
-      -h      ,  --help        : print this help
-      -s bps  ,  --speed=<bps> : print speed(bps), default to 100
-      -v      ,  --version     : version
-    Report bugs to <jeremial90@gmail.com>
+    scat --help
+
+    Usage: ./scat [options] [file]
+
+    Options:
+
+      -V, --version                 output program version
+      -h, --help                    output help information
+      -b, --bits <bits>             bits per char, default to 8
+      -s, --bps <bps>               print speed(bps), default to 100
 
 Install:
 ---
 
     make
-    sudo make install
 
-Uninstall:
----
-
-    sudo make uninstall
+then excute `./scat` with your options

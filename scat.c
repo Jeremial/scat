@@ -21,75 +21,41 @@
 #include <stdlib.h>
 #include <time.h>
 #include <getopt.h>
+#include "deps/commander/commander.h"
 
-#include "scat.h"
+#define PACKAGE_NAME "scat"
+#define VERSION "1.0.1"
+/* Change this to 8 if you want a true bps / character, and not a modem simulation */
+#define BITS_PER_CHAR 8
+#define BPS 100
 
-const char *short_opt = "b:hs:v";
+struct timespec delay;
 
-const struct option long_opt[] = {
-    {"bits",    required_argument,  NULL,   'b'},
-    {"help",    no_argument,        NULL,   'h'},
-    {"speed",   required_argument,  NULL,   's'},
-    {"version", no_argument,        NULL,   'v'},
-    {NULL,      0,                  NULL,   0}
-};
+int bits_per_char = BITS_PER_CHAR;
+int bps = BPS;
 
-void usage(void) {
-    printf("Usage: %s [-hv] [-b bits] [-s bps] [file ...]\n", PACKAGE_NAME);
-    printf("options:\n"
-           "  -b bits ,  --bits=<bits> : bits per char, default to 8\n"
-           "  -h      ,  --help        : print this help\n"
-           "  -s bps  ,  --speed=<bps> : print speed(bps), default to 100\n"
-           "  -v      ,  --version     : version\n");
+void
+on_bits_per_char(command_t *self){
+    bits_per_char = atoi(self->arg);
 }
 
-void version(void){
-    printf("%s version %s\n", PACKAGE_NAME, VERSION);
+void
+on_bps(command_t *self){
+    bps = atoi(self->arg);
 }
 
-void bugs(void){
-    printf("Report bugs to <%s>\n", BUGREPORT);
-}
+int
+main(int argc, char **argv) {
 
-int main(int argc, char **argv) {
-    char c = 0, ch;
-    char *file_name = NULL;
-    int bits_per_char = BITS_PER_CHAR;
-    int bps = BPS;
-    int i;
-    struct timespec delay;
-    FILE *fd;
+    command_t program;
+    command_init(&program, argv[0], VERSION);
+    program.usage = "[options] [file]";
+    command_option(&program, "-b", "--bits <bits>", "bits per char, default to 8", on_bits_per_char);
+    command_option(&program, "-s", "--bps <bps>", "print speed(bps), default to 100", on_bps);
+    command_parse(&program, argc, argv);
 
-    setbuf(stdout, 0);
-
-    while ((c = getopt_long(argc, argv, short_opt, long_opt, NULL)) != -1) {
-        switch (c) {
-        case 'b':
-            bits_per_char = atoi(optarg);
-            break;
-        case 'h':
-        case '?':
-            usage();
-            bugs();
-            exit(EXIT_SUCCESS);
-            break;
-        case 's':
-            bps = atoi(optarg);
-            break;
-        case 'v':
-            version();
-            exit(EXIT_SUCCESS);
-            break;
-        default:
-            usage();
-            bugs();
-            exit(EXIT_FAILURE);
-            break;
-        }
-    }
-
-    if (bps < 1) {
-        fprintf(stderr, "%s: bps rate [%d] not a positive integer.\n", PACKAGE_NAME, bps);
+    if(bps < 1){
+        fprintf(stderr, "bps rate [%d] not a positive integer.\n", bps);
         exit(EXIT_FAILURE);
     }else if (bps > bits_per_char) {
         delay.tv_sec = 0;
@@ -99,14 +65,17 @@ int main(int argc, char **argv) {
         delay.tv_nsec = (long)(1000000000 * (bits_per_char / (double)bps - delay.tv_sec));
     }
 
-    argc -= optind;
-    argv += optind;
+    setbuf(stdout, 0);
 
-    if (argc) { /* scat from local files */
-        for (i = 0; i < argc; ++i) {
-            file_name = argv[i];
-            if ((fd = fopen(file_name, "r")) == NULL) {
-                fprintf(stderr, "%s: could not open %s for reading.\n", PACKAGE_NAME, file_name);
+    char ch;
+    if (program.argc) { /* scat from local files */
+        char *file = NULL;
+        int i;
+        FILE *fd;
+        for (i = 0; i < program.argc; ++i) {
+            file = program.argv[i];
+            if ((fd = fopen(file, "r")) == NULL) {
+                fprintf(stderr, "could not open %s for reading.\n", file);
             }
             while ((ch = fgetc(fd)) != EOF) {
                 nanosleep(&delay, NULL);
